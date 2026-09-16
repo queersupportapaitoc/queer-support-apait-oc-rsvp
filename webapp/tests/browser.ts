@@ -327,9 +327,33 @@ try {
       ?.length,
     0,
   );
+  const updatedUsername = `updated-${randomUUID()}`;
+  const updatedPassword = `${randomUUID()}${randomUUID()}`;
+  await organizer.goto(`${base}/admin`, { waitUntil: 'networkidle0' });
+  await organizer.evaluate(() => {
+    const summary = [...document.querySelectorAll('summary')].find(
+      (element) => element.textContent === 'Organizer account',
+    ) as HTMLElement;
+    summary.click();
+  });
+  await organizer.$eval('[name=username]', (element) => {
+    (element as HTMLInputElement).value = '';
+  });
+  await organizer.type('[name=username]', updatedUsername);
+  await organizer.type('[name=currentPassword]', password);
+  await organizer.type('[name=newPassword]', updatedPassword);
+  await organizer.type('[name=confirmPassword]', updatedPassword);
+  await clickText(organizer, 'Update credentials');
+  await text(organizer, 'Organizer credentials updated');
+  await clickText(organizer, 'Sign out');
+  await organizer.waitForFunction(() => location.pathname === '/admin/login');
+  await organizer.type('[name=username]', updatedUsername);
+  await organizer.type('[name=password]', updatedPassword);
+  await organizer.click('button[type=submit], form button');
+  await organizer.waitForFunction(() => location.pathname === '/admin');
   assert.deepEqual(errors, [], 'No client-side JavaScript errors');
   console.log(
-    'Browser checks passed: organizer login/create/manual entry, encrypted signup, pair capacity, no-email return, waitlist claim, private-link recovery, event deletion, expiry, and mobile layout.',
+    'Browser checks passed: organizer login/create/manual entry, encrypted signup, pair capacity, no-email return, waitlist claim, private-link recovery, event deletion, expiry, account updates, and mobile layout.',
   );
   console.log('Screenshots saved in ignored .local/screenshots/.');
 } finally {

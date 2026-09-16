@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { encrypt, fromBase64, randomToken } from '../src/lib/crypto';
 import { defaultDeletion, localToInstant, toLocalInput } from '../src/lib/time';
 import { hashPassword, verifyPassword } from '../src/lib/password';
-import { payloadSchema } from '../src/lib/validation';
+import { payloadSchema, usernameSchema } from '../src/lib/validation';
 test('browser envelope round-trips and authenticates its event context', async () => {
   const rsa = await crypto.subtle.generateKey(
     {
@@ -100,6 +100,12 @@ test('required participant fields and management tokens are validated', () => {
       token,
     }).success,
   );
+});
+
+test('organizer usernames are normalized and constrained', () => {
+  assert.equal(usernameSchema.parse(' Vivian.Wing '), 'vivian.wing');
+  assert.equal(usernameSchema.safeParse('no spaces').success, false);
+  assert.equal(usernameSchema.safeParse('ab').success, false);
 });
 
 test('confirmation and waitlist emails describe status and link to explicit management', async () => {

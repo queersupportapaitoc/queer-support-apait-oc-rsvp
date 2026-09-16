@@ -1,5 +1,13 @@
 import { z } from 'zod';
 export const tokenSchema = z.string().regex(/^[A-Za-z0-9_-]{43}$/);
+export const usernameSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(
+    /^[a-z0-9_.-]{3,80}$/,
+    'Use 3–80 letters, digits, dots, underscores, or hyphens.',
+  );
 export const envelopeSchema = z.object({
   v: z.literal(1),
   key: z.string().max(1024),

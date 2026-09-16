@@ -4,7 +4,7 @@ A private-by-default RSVP app built with Next.js App Router and Supabase Postgre
 
 ## What it does
 
-- An organizer dashboard with username/password authentication, multiple events, editable capacity (default 15), editable Pacific event/deletion times, shareable links, participant rosters, manual additions, removals, and waitlist claims.
+- An organizer dashboard with username/password authentication, in-app credential changes, multiple events, editable capacity (default 15), editable Pacific event/deletion times, shareable links, participant rosters, manual additions, removals, and waitlist claims.
 - Browser-side AES-256-GCM encryption with RSA-OAEP-SHA-256 key wrapping. The server validates encrypted submissions and stores their encrypted envelopes. Names, answers, pronouns, email addresses, and management tokens are never stored as plaintext in PostgreSQL.
 - Atomic seat allocation in PostgreSQL. Bringing a friend counts as two people; a pair stays together. Declining consumes no seats. Lowering capacity preserves confirmed reservations.
 - Waitlist openings are first to claim, not automatic promotions or reservations. Eligible waitlisted people with email are notified, while any new signup or waitlisted claim can take an available opening first.
@@ -67,7 +67,7 @@ Integration and browser tests require the ignored root `.env` and `MAIL_DISABLED
 - Automatic or organizer-initiated deletion removes the event and its live participant rows, and invalidates management tokens. It does not erase historical database backups or mail already accepted by Gmail. SMTP providers handle recipient addresses and email content in plaintext. Review provider retention when writing any public privacy policy.
 - Participant cookies contain random bearer tokens. They last up to a year to tolerate changes to the event deletion date, but grant access only while the corresponding live record exists. Expired cookies are removed when returning to an expired event. Clearing cookies or switching browsers requires an email link; manual RSVPs without email must be managed by organizers.
 - The app does not publish a searchable event list or any public roster. It has no analytics or third-party frontend assets. A shared link is not an attendance eligibility check.
-- Organizer passwords are salted with scrypt. Sessions use hashed random tokens, expire after eight hours, and are invalidated on logout. Public writes and sign-in have shared database rate limits. Vercel's trusted forwarding header is used for IP bucketing; raw IPs are not stored.
+- Organizer passwords are salted with scrypt. Sessions use hashed random tokens, expire after eight hours, and are invalidated on logout. Changing a password requires the current password and revokes other sessions. Public writes, sign-in, and credential changes have database rate limits. Vercel's trusted forwarding header is used for IP bucketing; raw IPs are not stored.
 - Email delivery is at-least-once, with leases, exponential backoff, and eight automatic attempts. A crash after SMTP acceptance can cause a duplicate; a stable Message-ID helps identify retries. The admin dashboard exposes exhausted jobs for manual retry. Cancellation and expiry cascade-delete queued mail.
 - Event signup and seat claims close at the scheduled start. Existing guests can still remove their response until deletion.
 - Cancellation removes the participant record immediately. Removed responses are not retained as an audit history.

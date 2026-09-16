@@ -1,13 +1,22 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { adminSession } from '@/lib/auth';
-import { allRows } from '@/lib/db';
+import { allRows, checked, db } from '@/lib/db';
 import { eventTime } from '@/lib/time';
 import { Logout } from '@/components/AdminControls';
+import AccountSettings from '@/components/AccountSettings';
 import type { Event } from '@/lib/types';
 export const dynamic = 'force-dynamic';
 export default async function Admin() {
-  if (!(await adminSession())) redirect('/admin/login');
+  const session = await adminSession();
+  if (!session) redirect('/admin/login');
+  const admin = checked(
+    await db()
+      .from('rsvp_admins')
+      .select('username')
+      .eq('id', session.admin_id),
+  )[0];
+  if (!admin) redirect('/admin/login');
   const events = (await allRows<Event>('rsvp_events', 'starts_at')).reverse();
   return (
     <div className="admin-shell">
@@ -66,6 +75,12 @@ export default async function Admin() {
           })}
         </div>
       )}
+      <section className="card">
+        <details>
+          <summary>Organizer account</summary>
+          <AccountSettings username={admin.username} />
+        </details>
+      </section>
     </div>
   );
 }

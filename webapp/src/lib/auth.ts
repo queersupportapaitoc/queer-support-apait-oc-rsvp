@@ -19,7 +19,7 @@ export async function adminSession() {
   const session = checked(
     await db()
       .from('rsvp_sessions')
-      .select('admin_id')
+      .select('admin_id,token_hash')
       .eq('token_hash', hash(token))
       .gt('expires_at', new Date().toISOString()),
   );

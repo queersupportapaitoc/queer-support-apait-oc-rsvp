@@ -85,6 +85,8 @@ const errors: Record<string, [number, string]> = {
   ],
   INVALID_DELETION_TIME: [400, 'Choose a future deletion time.'],
   INVALID_LOGIN: [401, 'Username or password is incorrect.'],
+  CURRENT_PASSWORD: [401, 'Your current password is incorrect.'],
+  USERNAME_TAKEN: [409, 'That username is already in use.'],
 };
 export function failure(error: unknown) {
   if (error instanceof z.ZodError)
