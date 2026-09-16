@@ -15,7 +15,14 @@ export const POST = (request: Request, context: Context) =>
     z.uuid().parse(id);
     const body = z
       .object({
-        action: z.enum(['update', 'add', 'remove', 'claim', 'retry-mail']),
+        action: z.enum([
+          'update',
+          'add',
+          'remove',
+          'claim',
+          'retry-mail',
+          'delete-event',
+        ]),
         event: eventSchema.optional(),
         encrypted: envelopeSchema.optional(),
         registrationId: z.uuid().optional(),
@@ -25,6 +32,10 @@ export const POST = (request: Request, context: Context) =>
       await db().from('rsvp_events').select('*').eq('id', id),
     )[0] as Event | undefined;
     if (!event) throw new Error('NOT_FOUND');
+    if (body.action === 'delete-event') {
+      checked(await db().from('rsvp_events').delete().eq('id', id));
+      return json({ ok: true });
+    }
     if (event.purged_at || new Date(event.delete_at) <= new Date())
       throw new Error('EVENT_EXPIRED');
     if (body.action === 'update') {

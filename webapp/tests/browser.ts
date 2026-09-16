@@ -274,6 +274,31 @@ try {
     ).data?.capacity,
     1,
   );
+  const deletable = await client
+    .from('rsvp_events')
+    .insert({
+      title: 'Synthetic event to delete',
+      starts_at: new Date(Date.now() + 86400000).toISOString(),
+      delete_at: new Date(Date.now() + 172800000).toISOString(),
+      capacity: 1,
+    })
+    .select('id')
+    .single();
+  assert.equal(deletable.error, null);
+  await organizer.goto(`${base}/admin/events/${deletable.data!.id}`, {
+    waitUntil: 'networkidle0',
+  });
+  organizer.once('dialog', (dialog) => void dialog.accept());
+  await clickText(organizer, 'Delete event');
+  await organizer.waitForFunction(() => location.pathname === '/admin');
+  assert.equal(
+    (await client.from('rsvp_events').select('id').eq('id', deletable.data!.id))
+      .data?.length,
+    0,
+  );
+  await organizer.goto(`${base}/admin/events/${eventId}`, {
+    waitUntil: 'networkidle0',
+  });
   // Expired records cannot be recovered even before the cron purge executes.
   await client
     .from('rsvp_events')
@@ -297,9 +322,14 @@ try {
     ).data?.length,
     0,
   );
+  assert.equal(
+    (await client.from('rsvp_events').select('id').eq('id', eventId)).data
+      ?.length,
+    0,
+  );
   assert.deepEqual(errors, [], 'No client-side JavaScript errors');
   console.log(
-    'Browser checks passed: organizer login/create/manual entry, encrypted signup, pair capacity, no-email return, waitlist claim, private-link recovery, expiry, and mobile layout.',
+    'Browser checks passed: organizer login/create/manual entry, encrypted signup, pair capacity, no-email return, waitlist claim, private-link recovery, event deletion, expiry, and mobile layout.',
   );
   console.log('Screenshots saved in ignored .local/screenshots/.');
 } finally {

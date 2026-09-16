@@ -226,7 +226,7 @@ test('live PostgreSQL allocation, cancellation, mail queue, retention, and acces
       },
     );
     await t.test(
-      'expiry blocks mutations and cascades deletion to pending mail',
+      'expiry blocks mutations and deletes the event with its dependent data',
       async () => {
         const e = await event(1);
         const r = checked(await signup(e.id));
@@ -268,14 +268,10 @@ test('live PostgreSQL allocation, cancellation, mail queue, retention, and acces
           ).length,
           0,
         );
-        assert.ok(
-          checked(
-            await client
-              .from('rsvp_events')
-              .select('purged_at')
-              .eq('id', e.id)
-              .single(),
-          ).purged_at,
+        assert.equal(
+          checked(await client.from('rsvp_events').select('id').eq('id', e.id))
+            .length,
+          0,
         );
       },
     );

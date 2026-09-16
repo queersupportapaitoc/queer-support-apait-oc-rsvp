@@ -13,6 +13,7 @@ import {
   AddParticipant,
   RetryMail,
   ConfirmRegistration,
+  DeleteEvent,
 } from '@/components/AdminControls';
 import type { Event, Registration } from '@/lib/types';
 export const dynamic = 'force-dynamic';
@@ -95,8 +96,8 @@ export default async function ManageEvent({
           <h2>Participant information has expired.</h2>
           <p>
             The retention deadline has passed. Participant records are
-            unavailable and the scheduled purge removes them from the live
-            database. This event remains as an empty record.
+            unavailable, and the scheduled purge will remove this event from the
+            live database.
           </p>
         </section>
       ) : (
@@ -213,10 +214,18 @@ export default async function ManageEvent({
             </section>
           </div>
           <p className="help retention-note">
-            Participant information expires {eventTime(event.delete_at)}.
+            This event and its participant information will be deleted{' '}
+            {eventTime(event.delete_at)}.
           </p>
         </>
       )}
+      <section className="card">
+        <h2>Delete event</h2>
+        <p>
+          Permanently remove this event, every RSVP, and all pending emails.
+        </p>
+        <DeleteEvent eventId={id} title={event.title} />
+      </section>
     </div>
   );
 }

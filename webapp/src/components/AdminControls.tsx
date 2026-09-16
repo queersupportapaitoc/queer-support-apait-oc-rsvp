@@ -53,6 +53,52 @@ export function CopyLink({ url }: { url: string }) {
     </div>
   );
 }
+export function DeleteEvent({
+  eventId,
+  title,
+}: {
+  eventId: string;
+  title: string;
+}) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false),
+    [error, setError] = useState('');
+  return (
+    <>
+      <button
+        className="danger"
+        disabled={busy}
+        onClick={async () => {
+          if (
+            !window.confirm(
+              `Delete “${title}”? This permanently removes the event, every RSVP, and all pending emails.`,
+            )
+          )
+            return;
+          setBusy(true);
+          setError('');
+          try {
+            await api(`/api/admin/events/${eventId}`, {
+              action: 'delete-event',
+            });
+            router.push('/admin');
+            router.refresh();
+          } catch (e) {
+            setError((e as Error).message);
+            setBusy(false);
+          }
+        }}
+      >
+        {busy ? 'Deleting…' : 'Delete event'}
+      </button>
+      {error && (
+        <p role="alert" className="error">
+          {error}
+        </p>
+      )}
+    </>
+  );
+}
 export function RemoveRegistration({
   eventId,
   id,

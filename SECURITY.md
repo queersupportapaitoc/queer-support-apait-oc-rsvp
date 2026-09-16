@@ -16,7 +16,7 @@ RSA private key rotation requires decrypting and re-encrypting existing envelope
 
 ## Retention
 
-Application access stops at `delete_at`. A minutely PostgreSQL job physically deletes participant rows and their pending email jobs. The scheduler may be delayed by database unavailability; it catches up after recovery. Backups, provider logs, delivered email, and copies an organizer makes have separate lifecycles.
+Application access stops at `delete_at`. A minutely PostgreSQL job physically deletes each expired event, cascading to its participant rows and pending email jobs. The scheduler may be delayed by database unavailability; it catches up after recovery. Backups, provider logs, delivered email, and copies an organizer makes have separate lifecycles.
 
 Do not log request bodies, decrypted participant data, cookies, email links, or SMTP error details. The application logs only generic failure categories. Platform-level access logs may still contain public event URLs and network metadata.
 

@@ -127,8 +127,8 @@ export default function EventEditor({ event }: { event?: Event }) {
         </label>
         <p className="help">
           Defaults to midnight after the event. This removes answers, contact
-          information, management links, and pending emails from the live
-          database. The empty event remains in your dashboard.
+          information, management links, pending emails, and the event itself
+          from the live database.
         </p>
         <button
           className="text-button"
