@@ -733,9 +733,22 @@ p {
 }
 .person-heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+}
+.roster-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+}
+.roster-actions > button {
+  flex-shrink: 0;
+}
+.roster-actions > [role='alert'] {
+  flex-basis: 100%;
 }
 .person-heading h3 {
   font-size: 21px;

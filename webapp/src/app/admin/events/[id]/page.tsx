@@ -151,7 +151,7 @@ export default async function ManageEvent({
                           {r.seats === 2 ? ' · 2 people' : ''}
                         </span>
                       </div>
-                      <div>
+                      <div className="roster-actions">
                         {r.status === 'waitlisted' &&
                           new Date(event.starts_at) > new Date() && (
                             <ConfirmRegistration

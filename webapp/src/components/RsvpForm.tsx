@@ -9,6 +9,7 @@ import ParticipantFields, { readDetails } from './ParticipantFields';
 export default function RsvpForm({ initial }: { initial: PublicState }) {
   const [state, setState] = useState(initial),
     [busy, setBusy] = useState(false),
+    [checkingAvailability, setCheckingAvailability] = useState(false),
     [error, setError] = useState(''),
     [notice, setNotice] = useState(''),
     [confirmCancel, setConfirmCancel] = useState(false),
@@ -99,7 +100,37 @@ export default function RsvpForm({ initial }: { initial: PublicState }) {
       setBusy(false);
     }
   }
+  async function checkAvailability() {
+    setBusy(true);
+    setCheckingAvailability(true);
+    setError('');
+    setNotice('');
+    try {
+      const next = await api<PublicState>(endpoint);
+      setState(next);
+      const registration = next.registration;
+      setNotice(
+        next.expired || next.closed
+          ? 'Availability checked. Claims for this event are closed.'
+          : registration?.status === 'waitlisted'
+            ? next.available >= registration.seats
+              ? `Availability checked. ${registration.seats === 2 ? 'Two spots are available! Click “Claim two spots”' : 'A spot is available! Click “Claim my spot”'} below to confirm your RSVP.`
+              : `Availability checked. ${registration.seats === 2 ? 'There aren’t two spots available together yet.' : 'No spots are available yet.'} You’re still on the waitlist.`
+            : 'Availability checked. Your RSVP is up to date.',
+      );
+    } catch (e) {
+      setError(`Couldn’t check availability. ${(e as Error).message}`);
+    } finally {
+      setCheckingAvailability(false);
+      setBusy(false);
+    }
+  }
   const own = state.registration;
+  const canClaim =
+    own?.status === 'waitlisted' &&
+    !state.closed &&
+    !state.expired &&
+    state.available >= own.seats;
   return (
     <div className="event-layout">
       <aside className="event-story">
@@ -134,12 +165,20 @@ export default function RsvpForm({ initial }: { initial: PublicState }) {
       </aside>
       <section className="card form-card" aria-label="RSVP">
         <div className="section-heading">
-          <h2>RSVP Form</h2>
+          <h2>
+            {canClaim
+              ? own.seats === 2
+                ? 'Claim your spots'
+                : 'Claim your spot'
+              : 'RSVP Form'}
+          </h2>
         </div>
-        <p className="intro">
-          Thanks for filling out the RSVP form! For security reasons, we lock
-          the front door after everyone who has filled this form arrives.
-        </p>
+        {!canClaim && (
+          <p className="intro">
+            Thanks for filling out the RSVP form! For security reasons, we lock
+            the front door after everyone who has filled this form arrives.
+          </p>
+        )}
         {error && (
           <p role="alert" className="alert error">
             {error}
@@ -175,22 +214,30 @@ export default function RsvpForm({ initial }: { initial: PublicState }) {
                   ? 'Two spots confirmed.'
                   : 'Your spot is confirmed.'
                 : own.status === 'waitlisted'
-                  ? 'Your RSVP is waitlisted.'
+                  ? canClaim
+                    ? own.seats === 2
+                      ? 'Two spots are available!'
+                      : 'A spot is available!'
+                    : 'Your RSVP is waitlisted.'
                   : 'Thanks for letting us know.'}
             </h3>
             <p>
               {own.status === 'confirmed'
                 ? `Your ${own.seats === 2 ? 'two spots are' : 'spot is'} confirmed for ${eventTime(state.event.starts_at)}.`
                 : own.status === 'waitlisted'
-                  ? `You’re waiting for ${own.seats === 2 ? 'two spots together' : 'one spot'}. Openings are first come, first served; claim one here when available.`
+                  ? canClaim
+                    ? `Click “Claim ${own.seats === 2 ? 'two spots' : 'my spot'}” below to confirm ${own.seats === 2 ? 'your RSVP for you and your friend' : 'your RSVP'}. ${own.seats === 2 ? 'Your spots aren’t' : 'Your spot isn’t'} reserved until you claim ${own.seats === 2 ? 'them' : 'it'}.`
+                    : `You’re waiting for ${own.seats === 2 ? 'two spots together' : 'one spot'}. Openings are first come, first served; claim ${own.seats === 2 ? 'your spots' : 'your spot'} here when available.`
                   : 'No spot has been reserved. You can remove this response and sign up again if your plans change.'}
             </p>
             {own.status === 'waitlisted' && (
               <>
                 <p className="note">
-                  {own.hasEmail
-                    ? 'We’ll email when there’s room for your party. You can also check here.'
-                    : 'Return to this page on this same device and browser to check for an opening.'}
+                  {canClaim
+                    ? 'Openings are first come, first served.'
+                    : own.hasEmail
+                      ? 'We’ll email when there’s room for your party. You can also check here.'
+                      : 'Return to this page on this same device and browser to check for an opening.'}
                 </p>
                 {!state.closed && (
                   <button
@@ -208,16 +255,14 @@ export default function RsvpForm({ initial }: { initial: PublicState }) {
                 <button
                   className="text-button"
                   disabled={busy}
-                  onClick={() => {
-                    setError('');
-                    refresh().catch((e) => setError(e.message));
-                  }}
+                  aria-busy={checkingAvailability}
+                  onClick={checkAvailability}
                 >
-                  Check availability
+                  {checkingAvailability ? 'Checking…' : 'Check availability'}
                 </button>
               </>
             )}
-            {own.hasEmail && (
+            {own.hasEmail && !canClaim && (
               <p className="help">
                 Your email includes a private management link. Delivery can take
                 a few minutes; check your spam folder too.
