@@ -346,6 +346,11 @@ p {
   display: block;
   margin-bottom: 23px;
 }
+.participant-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
 .field > span,
 .field legend {
   display: block;
@@ -944,6 +949,10 @@ details[open] > summary {
     font-size: 34px;
   }
   .two-columns {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .participant-details {
     grid-template-columns: 1fr;
     gap: 0;
   }

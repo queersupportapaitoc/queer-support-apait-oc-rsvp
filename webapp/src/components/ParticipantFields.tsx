@@ -19,36 +19,37 @@ export default function ParticipantFields({
   available: number;
   admin?: boolean;
 }) {
-  const [attendance, setAttendance] = useState('yes');
+  const [attendance, setAttendance] = useState('');
   const likelyWaitlist =
     attendance !== 'no' && available < (attendance === 'friend' ? 2 : 1);
   return (
     <>
-      <label className="field">
-        <span>
-          1. Your name <span className="required">*</span>
-        </span>
-        <input
-          name="name"
-          required
-          maxLength={160}
-          autoComplete="name"
-          placeholder="Enter your answer"
-        />
-      </label>
-      <label className="field">
-        <span>Your pronouns</span>
-        <input
-          name="pronouns"
-          maxLength={100}
-          placeholder="e.g. they/them"
-          autoComplete="off"
-        />
-      </label>
+      <div className="participant-details">
+        <label className="field">
+          <span>
+            Your name <span className="required">*</span>
+          </span>
+          <input
+            name="name"
+            required
+            maxLength={160}
+            autoComplete="name"
+            placeholder="Enter your answer"
+          />
+        </label>
+        <label className="field">
+          <span>Your pronouns</span>
+          <input
+            name="pronouns"
+            maxLength={100}
+            placeholder="e.g. they/them"
+            autoComplete="off"
+          />
+        </label>
+      </div>
       <fieldset className="field choices">
         <legend>
-          2. Will you be joining us this evening?{' '}
-          <span className="required">*</span>
+          Will you be joining us this week? <span className="required">*</span>
         </legend>
         {[
           ['yes', "Yep! I'll be there."],
@@ -67,20 +68,27 @@ export default function ParticipantFields({
           </label>
         ))}
       </fieldset>
+      {(attendance === 'yes' || attendance === 'friend') && (
+        <label className="choice">
+          <input type="checkbox" name="acknowledgement" required />
+          By submitting this form, I am reserving{' '}
+          {attendance === 'friend' ? 2 : 1} of the remaining seats. If my plans
+          change and I can no longer make it, I will remove my RSVP or let Rene
+          know as soon as I can. <span className="required">*</span>
+        </label>
+      )}
       {attendance === 'friend' && (
-        <p className="note">
-          You and your friend count as two people. Your RSVP stays together, so
-          you’ll need two available spots.
-        </p>
+        <label className="field">
+          <span>What is your friend&apos;s name/pronouns?</span>
+          <input
+            name="friend"
+            maxLength={300}
+            placeholder="Enter your answer"
+          />
+        </label>
       )}
       <label className="field">
-        <span>
-          3. If you are bringing a friend, what is their name/pronouns?
-        </span>
-        <input name="friend" maxLength={300} placeholder="Enter your answer" />
-      </label>
-      <label className="field">
-        <span>4. Questions? Comments? Concerns?</span>
+        <span>Questions? Comments? Concerns?</span>
         <textarea
           name="comments"
           maxLength={3000}
