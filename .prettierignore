@@ -1,0 +1,8 @@
+node_modules
+.next
+.local
+.env
+.env.*
+package-lock.json
+webapp/next-env.d.ts
+docs/reference/original-form.md

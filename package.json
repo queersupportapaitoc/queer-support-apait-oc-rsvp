@@ -1,0 +1,25 @@
+{
+  "name": "queer-support-rsvp",
+  "private": true,
+  "workspaces": [
+    "webapp"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace webapp",
+    "build": "npm run build --workspace webapp",
+    "start": "npm run start --workspace webapp",
+    "check": "npm run check --workspace webapp",
+    "test": "npm run test --workspace webapp",
+    "db:migrate": "node scripts/migrate.mjs",
+    "admin:create": "node scripts/admin.mjs",
+    "setup:keys": "node scripts/keys.mjs",
+    "cron:configure": "node scripts/cron.mjs",
+    "test:integration": "npm run test:integration --workspace webapp",
+    "test:browser": "npm run test:browser --workspace webapp",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "queer-support-web",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "check": "next typegen && tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "test:integration": "tsx --test tests/database.integration.ts",
+    "test:browser": "tsx tests/browser.ts"
+  },
+  "dependencies": {
+    "@js-temporal/polyfill": "^0.5.1",
+    "@supabase/supabase-js": "^2.116.0",
+    "next": "^16.3.5",
+    "nodemailer": "^10.0.10",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.3",
+    "@types/nodemailer": "^8.0.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "prettier": "^3.9.6",
+    "puppeteer-core": "^25.11.0",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  },
+  "type": "module"
+}
