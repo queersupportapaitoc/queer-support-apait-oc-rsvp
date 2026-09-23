@@ -133,6 +133,23 @@ test('confirmation and waitlist emails describe status and link to explicit mana
   assert.match(confirmed.text, /two confirmed places/);
   assert.match(confirmed.text, /6:00 PM PDT/);
   assert.ok(confirmed.text.includes(link));
+  assert.match(confirmed.text, /Looking forward to seeing you on Thursday!/);
+  assert.match(confirmed.text, /locking the door/);
+  assert.match(confirmed.text, /through the back to minimize disruptions/);
+  assert.match(confirmed.text, /also remove your RSVP using the link below/);
+  assert.equal(confirmed.replyTo, 'renes@apaitssg.org');
+  assert.match(confirmed.html, /two confirmed places/);
+  assert.match(confirmed.html, /locking the door/);
+  assert.ok(confirmed.html.includes(`href="${link}"`));
+  const escaped = mailContent(
+    { ...event, title: '<img src=x>', location: 'Room <A> & "B"' },
+    { status: 'confirmed', seats: 1 },
+    'confirmed',
+    `${link}&value="test"`,
+  );
+  assert.doesNotMatch(escaped.html, /<img src=x>|Room <A>/);
+  assert.match(escaped.html, /Room &#60;A&#62; &#38; &#34;B&#34;/);
+  assert.ok(escaped.html.includes(`${link}&#38;value=&#34;test&#34;`));
   const waiting = mailContent(
     event,
     { status: 'waitlisted', seats: 1 },
@@ -149,4 +166,32 @@ test('confirmation and waitlist emails describe status and link to explicit mana
   assert.match(opening.text, /first come, first served/);
   assert.match(opening.text, /Claim two spots/);
   assert.ok(opening.text.trimEnd().endsWith(link));
+  for (const mail of [waiting, opening]) {
+    assert.doesNotMatch(
+      mail.text,
+      /Looking forward to seeing you|locking the door/,
+    );
+    assert.match(mail.text, /Mobile: \(213\) 434 2948/);
+    assert.doesNotMatch(
+      mail.html,
+      /Looking forward to seeing you|locking the door/,
+    );
+  }
+  assert.match(waiting.html, /not confirmed until you claim/);
+  assert.match(opening.html, /first come, first served/);
+  for (const status of ['confirmed', 'waitlisted', 'declined'] as const) {
+    const updated = mailContent(
+      { ...event, starts_at: '2026-09-19T01:00:00Z' },
+      { status, seats: 1 },
+      'updated',
+      link,
+    );
+    assert.match(updated.subject, /details have changed/);
+    assert.ok(updated.text.includes(link));
+    if (status === 'confirmed') {
+      assert.match(updated.text, /Looking forward to seeing you on Friday!/);
+    } else {
+      assert.doesNotMatch(updated.text, /Looking forward to seeing you/);
+    }
+  }
 });
